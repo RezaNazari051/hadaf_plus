@@ -17,9 +17,9 @@ final GetIt locator = GetIt.instance;
 Future<void> initLocator() async {
   final Dio dio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(milliseconds: 1000),
-      sendTimeout: const Duration(milliseconds: 1000),
-      receiveTimeout: const Duration(milliseconds: 1000),
+      connectTimeout: const Duration(seconds: 60),
+      sendTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
     ),
   )..interceptors.add(TalkerDioLogger(
         settings: const TalkerDioLoggerSettings(

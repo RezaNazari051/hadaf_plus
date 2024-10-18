@@ -35,6 +35,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       if (dataState is DataSuccess) {
         emit(state.copyWith(
             newGetTodoStatus: GetTodosCompleted(dataState.data)));
+
       }
       if (dataState is DataFailed) {
         emit(state.copyWith(
@@ -64,6 +65,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       if (dataState is DataSuccess) {
         emit(state.copyWith(
             newUpdateTodoStatus: UpdateTodoCompleted(dataState.data)));
+            add(GetAllTodosEvent());
       }
       if (dataState is DataFailed) {
         emit(state.copyWith(
@@ -78,6 +80,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       if (dataState is DataSuccess) {
         emit(state.copyWith(
             newDeleteTodoStatus: DeleteTodoCompleted(dataState.data)));
+        add(GetAllTodosEvent());
+
       }
       if (dataState is DataFailed) {
         emit(state.copyWith(

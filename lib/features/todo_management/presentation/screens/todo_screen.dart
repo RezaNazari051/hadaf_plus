@@ -5,12 +5,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gap/gap.dart';
 import 'package:hadaf_plus/core/params/update_todo_params.dart';
 import 'package:hadaf_plus/features/todo_management/domain/entities/todo_entity.dart';
-import 'package:hadaf_plus/features/todo_management/presentation/bloc/add_new_todo_status.dart';
-import 'package:hadaf_plus/features/todo_management/presentation/bloc/delete_todo_status.dart';
 import 'package:hadaf_plus/features/todo_management/presentation/bloc/get_todos_status.dart';
 import 'package:hadaf_plus/features/todo_management/presentation/bloc/todo_bloc.dart';
 import 'package:hadaf_plus/features/todo_management/presentation/bloc/todo_state.dart';
-import 'package:hadaf_plus/features/todo_management/presentation/bloc/update_todo_status.dart';
+import 'package:hadaf_plus/features/todo_management/presentation/widgets/add_new_todo_widget.dart';
 
 import '../widgets/slide_action.dart';
 
@@ -22,105 +20,25 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  late TextEditingController _controller;
-
   @override
   void initState() {
-    _controller = TextEditingController();
     context.read<TodoBloc>().add(GetAllTodosEvent());
     super.initState();
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Todo list',style: TextStyle(fontSize: 25,fontWeight:FontWeight.bold ),),
+        centerTitle: true,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
             context: context,
             builder: (context) {
-              final border = OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(15));
-
-              return Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Gap(20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: TextFormField(
-                        controller: _controller,
-                        decoration: InputDecoration(
-                          hintText: 'TODO:',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          border: border,
-                          focusedBorder: border,
-                          enabledBorder: border,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: BlocConsumer<TodoBloc, TodoState>(
-                        buildWhen: (previous, current) {
-                          return previous.addNewTodoStatus !=
-                              current.addNewTodoStatus;
-                        },
-                        listenWhen: (previous, current) {
-                          return previous.addNewTodoStatus !=
-                              current.addNewTodoStatus;
-                        },
-                        listener: (context, state) {
-                          if (state.addNewTodoStatus is AddNewTodoCompleted) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              content: Text('Todo saved successfully'),
-                              duration: Duration(seconds: 2),
-                            ));
-                            Navigator.pop(context);
-                          }
-                        },
-                        builder: (context, state) {
-                          return ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: Size(
-                                MediaQuery.sizeOf(context).width,
-                                48,
-                              ),
-                            ),
-                            onPressed: () {
-                              if (_controller.text.isNotEmpty) {
-                                context
-                                    .read<TodoBloc>()
-                                    .add(AddTodoEvent(_controller.text));
-                              }
-                            },
-                            child: state.addNewTodoStatus is AddNewTodoLoading
-                                ? const CupertinoActivityIndicator()
-                                : const Text('Save'),
-                          );
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          ).whenComplete(
-            () {
-              if (context.mounted) {
-                context.read<TodoBloc>().add(GetAllTodosEvent());
-              }
+        return const AddNewTodoBottomSheet();
             },
           );
         },
@@ -129,27 +47,18 @@ class _TodoScreenState extends State<TodoScreen> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            BlocConsumer<TodoBloc, TodoState>(
+            BlocBuilder<TodoBloc, TodoState>(
               buildWhen: (previous, current) {
                 return previous.getTodosStatus != current.getTodosStatus;
               },
-              listenWhen: (previous, current) {
-                return previous.deleteTodoStatus != current.deleteTodoStatus ||
-                    previous.updateTodoStatus != current.updateTodoStatus;
-              },
-              listener: (context, state) {
-                if (state.deleteTodoStatus is DeleteTodoCompleted) {
-                  context.read<TodoBloc>().add(GetAllTodosEvent());
-                }
-                if (state.updateTodoStatus is UpdateTodoCompleted) {
-                  context.read<TodoBloc>().add(GetAllTodosEvent());
-                }
-              },
               builder: (context, state) {
                 if (state.getTodosStatus is GetTodosLoading) {
-                  return const SliverToBoxAdapter(
-                    child: CupertinoActivityIndicator(
-                      radius: 20,
+                  return SliverPadding(
+                    padding: EdgeInsets.only(top: MediaQuery.sizeOf(context).height*0.4),
+                    sliver: const SliverToBoxAdapter(
+                      child: CupertinoActivityIndicator(
+                        radius: 20,
+                      ),
                     ),
                   );
                 } else if (state.getTodosStatus is GetTodosError) {
